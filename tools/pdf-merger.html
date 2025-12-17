@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toolsuite: PDF Merger</title>
+</head>
+<body>
+
+    <header>
+        <h1>PDF Merger</h1>
+        <p>Select two or more PDF files to merge them instantly in your browser.</p>
+        <p><strong>No upload. No login. No server.</strong></p>
+    </header>
+
+    <main>
+        <section id="input-files">
+            <h2>Select Files</h2>
+            <input type="file" id="pdfFileInput" accept=".pdf" multiple>
+            <p>
+                <small>Hold **Ctrl** or **Cmd** to select multiple files.</small>
+            </p>
+            <div id="fileList">
+                </div>
+        </section>
+        
+        <hr>
+
+        <section id="controls">
+            <button id="mergeButton" disabled>Merge PDFs and Download</button>
+            <p id="statusMessage" style="font-style: italic;">Awaiting file selection...</p>
+        </section>
+
+    </main>
+
+    <footer>
+        <hr>
+        <p><a href="/">Back to Project Toolsuite Home</a></p>
+    </footer>
+
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <script src="merger-logic.js"></script>
+
+</body>
+</html>
