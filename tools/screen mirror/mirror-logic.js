@@ -3,75 +3,82 @@
 let peer = null;
 let localStream = null;
 
-// 1. SHARING YOUR SCREEN (LAPTOP)
 async function startSharing() {
     try {
-        // Request screen capture FIRST (User Gesture)
+        // 1. Get the screen stream first
         localStream = await navigator.mediaDevices.getDisplayMedia({ 
-            video: { cursor: "always" },
+            video: true,
             audio: false 
         });
         
-        // Show local preview
         const video = document.getElementById('videoElement');
         video.srcObject = localStream;
 
-        // Generate ID
         const shortId = Math.floor(1000 + Math.random() * 9000).toString();
-        peer = new Peer('toolsuite-' + shortId);
+        // Use a clean PeerJS configuration
+        peer = new Peer('toolsuite-' + shortId, {
+            debug: 2
+        });
 
-        peer.on('open', (id) => {
+        peer.on('open', () => {
             document.getElementById('setup-zone').classList.add('hidden');
             document.getElementById('display-zone').classList.remove('hidden');
-            document.getElementById('share-id-display').innerHTML = `SHARE CODE: <span style="font-size:2rem; background:#000; color:#fff; padding:0 10px;">${shortId}</span>`;
-            document.getElementById('status-text').innerText = "Waiting for viewer...";
+            document.getElementById('share-id-display').innerHTML = `CODE: <strong style="font-size:2rem;">${shortId}</strong>`;
+            document.getElementById('status-text').innerText = "WAITING FOR MOBILE...";
         });
 
-        // When the phone calls, answer with the stream we already captured
         peer.on('call', (call) => {
-            console.log("Receiving call from phone...");
+            console.log("Phone is connecting...");
             call.answer(localStream);
-            document.getElementById('status-text').innerText = "STREAMING LIVE";
-        });
-
-        peer.on('error', (err) => {
-            console.error(err);
-            alert("Connection error. Is this code already in use?");
+            
+            call.on('stream', () => {
+                document.getElementById('status-text').innerText = "CONNECTED & STREAMING";
+            });
         });
 
     } catch (err) {
-        alert("Permission denied or error: " + err.message);
+        alert("Screen share failed: " + err.message);
     }
 }
 
-// 2. WATCHING A SCREEN (PHONE)
 function joinStream() {
     const code = document.getElementById('joinCode').value.trim();
-    if (code.length < 4) return alert("Enter the 4-digit code.");
+    if (!code) return;
 
-    // Phone gets a random ID
-    peer = new Peer();
+    peer = new Peer(); // Mobile gets random ID
 
-    peer.on('open', (id) => {
+    peer.on('open', () => {
+        document.getElementById('status-text').innerText = "SHAKING HANDS...";
         document.getElementById('setup-zone').classList.add('hidden');
         document.getElementById('display-zone').classList.remove('hidden');
-        document.getElementById('status-text').innerText = "Connecting to " + code + "...";
 
-        // Call the laptop. We don't send a stream (null), we just wait for theirs.
-        const call = peer.call('toolsuite-' + code, new MediaStream()); 
-        
+        // On mobile, we MUST provide a dummy stream or an empty MediaStream
+        // so the laptop has something to "answer" to.
+        const call = peer.call('toolsuite-' + code, new MediaStream());
+
         call.on('stream', (remoteStream) => {
-            console.log("Stream received!");
+            console.log("Stream received on mobile!");
             const video = document.getElementById('videoElement');
-            video.srcObject = remoteStream;
-            document.getElementById('status-text').innerText = "VIEWING REMOTE SCREEN";
             
-            // Safari/iOS fix: videos often need an explicit play() call
-            video.play().catch(e => console.log("Auto-play blocked, wait for user interaction."));
+            // Critical for Mobile: Set srcObject then explicitly call .play()
+            video.srcObject = remoteStream;
+            
+            document.getElementById('status-text').innerText = "LIVE VIEW";
+            
+            // Force play for Safari/Chrome mobile
+            const playPromise = video.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(() => {
+                    // If it fails, show a button to the user to manually play
+                    document.getElementById('status-text').innerHTML = 
+                        '<button onclick="document.getElementById(\'videoElement\').play()">TAP TO VIEW STREAM</button>';
+                });
+            }
         });
+    });
 
-        call.on('error', (err) => {
-            document.getElementById('status-text').innerText = "Connection Failed.";
-        });
+    peer.on('error', (err) => {
+        document.getElementById('status-text').innerText = "ERROR: " + err.type;
+        console.error(err);
     });
 }
