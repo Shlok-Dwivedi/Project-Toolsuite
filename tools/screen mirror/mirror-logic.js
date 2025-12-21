@@ -1,59 +1,77 @@
+'use strict';
+
 let peer = null;
-let currentCall = null;
+let localStream = null;
 
-// 1. SHARING YOUR SCREEN
+// 1. SHARING YOUR SCREEN (LAPTOP)
 async function startSharing() {
-    // Generate a simple 4-digit code
-    const shortId = Math.floor(1000 + Math.random() * 9000).toString();
-    
-    // Initialize Peer with that ID
-    // Note: PeerJS IDs must be unique, so we prefix it
-    peer = new Peer('toolsuite-' + shortId);
-
-    peer.on('open', (id) => {
-        document.getElementById('setup-zone').classList.add('hidden');
-        document.getElementById('display-zone').classList.remove('hidden');
-        document.getElementById('share-id-display').innerHTML = `SHARE THIS CODE: <strong>${shortId}</strong>`;
-        document.getElementById('status-text').innerText = "Waiting for receiver to connect...";
-    });
-
-    peer.on('call', async (call) => {
-        const stream = await navigator.mediaDevices.getDisplayMedia({ 
+    try {
+        // Request screen capture FIRST (User Gesture)
+        localStream = await navigator.mediaDevices.getDisplayMedia({ 
             video: { cursor: "always" },
             audio: false 
         });
         
-        call.answer(stream); // Send the screen stream to the caller
-        document.getElementById('status-text').innerText = "Streaming LIVE!";
-        
         // Show local preview
-        document.getElementById('videoElement').srcObject = stream;
-    });
+        const video = document.getElementById('videoElement');
+        video.srcObject = localStream;
 
-    peer.on('error', (err) => {
-        alert("ID taken or connection error. Try again.");
-        location.reload();
-    });
+        // Generate ID
+        const shortId = Math.floor(1000 + Math.random() * 9000).toString();
+        peer = new Peer('toolsuite-' + shortId);
+
+        peer.on('open', (id) => {
+            document.getElementById('setup-zone').classList.add('hidden');
+            document.getElementById('display-zone').classList.remove('hidden');
+            document.getElementById('share-id-display').innerHTML = `SHARE CODE: <span style="font-size:2rem; background:#000; color:#fff; padding:0 10px;">${shortId}</span>`;
+            document.getElementById('status-text').innerText = "Waiting for viewer...";
+        });
+
+        // When the phone calls, answer with the stream we already captured
+        peer.on('call', (call) => {
+            console.log("Receiving call from phone...");
+            call.answer(localStream);
+            document.getElementById('status-text').innerText = "STREAMING LIVE";
+        });
+
+        peer.on('error', (err) => {
+            console.error(err);
+            alert("Connection error. Is this code already in use?");
+        });
+
+    } catch (err) {
+        alert("Permission denied or error: " + err.message);
+    }
 }
 
-// 2. WATCHING A SCREEN
+// 2. WATCHING A SCREEN (PHONE)
 function joinStream() {
     const code = document.getElementById('joinCode').value.trim();
-    if (code.length < 4) return alert("Enter a valid code.");
+    if (code.length < 4) return alert("Enter the 4-digit code.");
 
-    peer = new Peer(); // Receiver gets a random ID
+    // Phone gets a random ID
+    peer = new Peer();
 
     peer.on('open', (id) => {
         document.getElementById('setup-zone').classList.add('hidden');
         document.getElementById('display-zone').classList.remove('hidden');
         document.getElementById('status-text').innerText = "Connecting to " + code + "...";
 
-        // We "call" the host. In our logic, the host answers with their screen.
-        const call = peer.call('toolsuite-' + code, null); 
+        // Call the laptop. We don't send a stream (null), we just wait for theirs.
+        const call = peer.call('toolsuite-' + code, new MediaStream()); 
         
         call.on('stream', (remoteStream) => {
-            document.getElementById('videoElement').srcObject = remoteStream;
-            document.getElementById('status-text').innerText = "Viewing Remote Screen";
+            console.log("Stream received!");
+            const video = document.getElementById('videoElement');
+            video.srcObject = remoteStream;
+            document.getElementById('status-text').innerText = "VIEWING REMOTE SCREEN";
+            
+            // Safari/iOS fix: videos often need an explicit play() call
+            video.play().catch(e => console.log("Auto-play blocked, wait for user interaction."));
+        });
+
+        call.on('error', (err) => {
+            document.getElementById('status-text').innerText = "Connection Failed.";
         });
     });
 }
