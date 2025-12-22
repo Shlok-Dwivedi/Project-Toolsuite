@@ -11,5 +11,11 @@ Just your work and our tools.
 ## 🏆 Contributors Leaderboard
 
 <!-- LEADERBOARD_START -->
-_Updating leaderboard..._
+
+| Rank | Contributor | Points | Commits |
+|-----:|------------|-------:|--------:|
+| 1 | @Winter262005 | 69 | 69 |
+| 2 | @Shlok-Dwivedi | 1 | 1 |
+| 3 | @SuyashSoni10 | 1 | 1 |
+
 <!-- LEADERBOARD_END -->
