@@ -1,0 +1,80 @@
+name: Update Leaderboard
+
+on:
+  schedule:
+    - cron: "0 0 * * *"   # runs daily
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  leaderboard:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Generate leaderboard and update README
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require("fs");
+
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            // Fetch contributors
+            const contributors = await github.paginate(
+              github.rest.repos.listContributors,
+              { owner, repo }
+            );
+
+            if (contributors.length === 0) {
+              console.log("No contributors found.");
+              return;
+            }
+
+            // Build table rows
+            const rows = contributors.map((c, i) => {
+              return `| ${i + 1} | @${c.login} | ${c.contributions} | ${c.contributions} |`;
+            });
+
+            const table =
+              "| Rank | Contributor | Points | Commits |\n" +
+              "|-----:|------------|-------:|--------:|\n" +
+              rows.join("\n");
+
+            // Update README.md
+            const start = "<!-- LEADERBOARD_START -->";
+            const end = "<!-- LEADERBOARD_END -->";
+
+            let readme = fs.readFileSync("README.md", "utf8");
+
+            const regex = new RegExp(`${start}[\\s\\S]*?${end}`, "m");
+
+            readme = readme.replace(
+              regex,
+              `${start}\n\n${table}\n\n${end}`
+            );
+
+            fs.writeFileSync("README.md", readme);
+
+            // Also write LEADERBOARD.md (optional but nice)
+            const leaderboardFile =
+              "# 🏆 Project Toolsuite Leaderboard\n\n" +
+              table +
+              "\n\n_Last updated: " +
+              new Date().toUTCString() +
+              "_\n";
+
+            fs.writeFileSync("LEADERBOARD.md", leaderboardFile);
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add README.md LEADERBOARD.md
+          git commit -m "chore: update contributors leaderboard" || echo "No changes"
+          git push

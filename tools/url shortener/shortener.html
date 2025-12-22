@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toolsuite: Instant URL Shortener</title>
+    <style>
+        /* Global Minimalist Styling */
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #ffffff;
+            color: #000000;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        header {
+            border-bottom: 5px solid #000;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            text-transform: uppercase;
+            margin: 0;
+            padding-bottom: 10px;
+        }
+
+        /* Form Elements */
+        .input-box {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #000;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1rem;
+            box-sizing: border-box;
+            margin-bottom: 15px;
+            background: #fff;
+            border-radius: 0;
+        }
+
+        /* Buttons */
+        button {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #ffffff;
+            color: #000000;
+            border: 2px solid #000;
+            padding: 12px 24px;
+            text-transform: uppercase;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+
+        button:hover {
+            background-color: #000;
+            color: #fff;
+        }
+
+        .copy-btn {
+            margin-top: 15px;
+        }
+
+        /* Result Area */
+        #result-container {
+            display: none;
+            margin-top: 30px;
+            padding: 20px;
+            border: 1px dashed #000;
+            background: #fff;
+        }
+
+        #shortUrl {
+            font-weight: bold;
+            font-size: 1.2rem;
+            word-break: break-all;
+            margin-top: 10px;
+            display: block;
+        }
+
+        #status {
+            margin-top: 15px;
+            padding: 5px 10px;
+            border: 1px dashed #000;
+            display: inline-block;
+            font-size: 0.9rem;
+        }
+
+        /* UI Helpers */
+        hr {
+            border: none;
+            border-top: 1px solid #000;
+            margin: 40px 0;
+        }
+
+        a {
+            color: #000;
+            text-decoration: none;
+            border-bottom: 1px dotted #000;
+        }
+
+        a:hover {
+            background-color: #000;
+            color: #fff;
+        }
+
+        footer {
+            margin-top: 60px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>URL Shortener</h1>
+        <p>Turn long, messy links into clean, shareable ones instantly. No tracking, no accounts.</p>
+    </header>
+
+    <main>
+        <section>
+            <input type="url" id="longUrl" class="input-box" placeholder="https://very-long-link.com/with/lots/of/parameters/12345">
+            <button id="shortenBtn">Shorten Link</button>
+
+            <div id="result-container">
+                <p style="margin: 0; text-transform: uppercase; font-size: 0.8rem;">Your shortened link:</p>
+                <div id="shortUrl"></div>
+                <button id="copyBtn" class="copy-btn">Copy to Clipboard</button>
+            </div>
+            
+            <div style="display: block;">
+                <p id="status">System Ready: Waiting for URL...</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <hr>
+        <p><a href="https://project-toolsuite.vercel.app">← Back to Home</a></p>
+    </footer>
+
+    <script src="shorten-logic.js"></script>
+</body>
+</html>

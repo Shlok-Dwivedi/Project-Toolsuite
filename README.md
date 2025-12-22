@@ -1,6 +1,21 @@
 # Project-Toolsuite
-Imagine this. You open your browser to create a PDF. You worked hard on it, tirelessly creating every page to your choice. You press the download button and the website asks you to login. You login and rest is history.
+Imagine this: you open your browser to make a PDF. You pour your heart and soul into it, pixel-perfect pages and what not. You proudly click download… and boom “Please log in to continue.”
 
-This is what Project Toolsuite wishes to not be.
+You sigh. You log in. Somewhere along the way, your enthusiasm quietly leaves the room.
 
-No Logins, No Paywalls. Just your work and my tools.
+That’s exactly what Project Toolsuite refuses to be.
+
+No logins. No paywalls. No “verify your email” for the 17th time.
+Just your work and our tools.
+
+## 🏆 Contributors Leaderboard
+
+<!-- LEADERBOARD_START -->
+
+| Rank | Contributor | Points | Commits |
+|-----:|------------|-------:|--------:|
+| 1 | @Winter262005 | 69 | 69 |
+| 2 | @Shlok-Dwivedi | 1 | 1 |
+| 3 | @SuyashSoni10 | 1 | 1 |
+
+<!-- LEADERBOARD_END -->
